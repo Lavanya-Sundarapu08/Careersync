@@ -67,7 +67,7 @@ public class SecurityConfig {
                 )
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/actuator/health", "/actuator/prometheus").permitAll()
+                .requestMatchers("/", "/error", "/api/auth/**", "/actuator/health", "/actuator/prometheus").permitAll()
                 .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                 .requestMatchers("/api/jobs/**").permitAll() // public job board (GET); write ops re-guarded via @PreAuthorize
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
