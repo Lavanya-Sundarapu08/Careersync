@@ -40,6 +40,33 @@ public class PostgresAutoCreationPostProcessor implements EnvironmentPostProcess
             environment.getPropertySources().addFirst(new MapPropertySource("redisUrlMapping", redisProps));
         }
 
+        // Sanitize database URL if provided without jdbc: prefix (common in cloud providers like Neon / Render)
+        String rawDbUrl = environment.getProperty("SPRING_DATASOURCE_URL");
+        if (rawDbUrl == null || rawDbUrl.isBlank()) {
+            rawDbUrl = environment.getProperty("DATABASE_URL");
+        }
+        if (rawDbUrl == null || rawDbUrl.isBlank()) {
+            rawDbUrl = environment.getProperty("spring.datasource.url");
+        }
+
+        if (rawDbUrl != null && !rawDbUrl.isBlank()) {
+            String fixedDbUrl = rawDbUrl.trim();
+            if (fixedDbUrl.startsWith("postgres://")) {
+                fixedDbUrl = "jdbc:postgresql://" + fixedDbUrl.substring("postgres://".length());
+            } else if (fixedDbUrl.startsWith("postgresql://")) {
+                fixedDbUrl = "jdbc:postgresql://" + fixedDbUrl.substring("postgresql://".length());
+            } else if (!fixedDbUrl.startsWith("jdbc:")) {
+                fixedDbUrl = "jdbc:" + fixedDbUrl;
+            }
+
+            if (!fixedDbUrl.equals(rawDbUrl)) {
+                log.info("Automatically sanitized datasource URL to include 'jdbc:' prefix.");
+                Map<String, Object> dbProps = new HashMap<>();
+                dbProps.put("spring.datasource.url", fixedDbUrl);
+                environment.getPropertySources().addFirst(new MapPropertySource("sanitizedDatasourceUrl", dbProps));
+            }
+        }
+
         String url = environment.getProperty("spring.datasource.url");
         String username = environment.getProperty("spring.datasource.username");
         String password = environment.getProperty("spring.datasource.password");
