@@ -51,6 +51,10 @@ public class PostgresAutoCreationPostProcessor implements EnvironmentPostProcess
 
         if (rawDbUrl != null && !rawDbUrl.isBlank()) {
             String fixedDbUrl = rawDbUrl.trim();
+            if ((fixedDbUrl.startsWith("\"") && fixedDbUrl.endsWith("\"")) ||
+                (fixedDbUrl.startsWith("'") && fixedDbUrl.endsWith("'"))) {
+                fixedDbUrl = fixedDbUrl.substring(1, fixedDbUrl.length() - 1).trim();
+            }
             if (fixedDbUrl.startsWith("postgres://")) {
                 fixedDbUrl = "jdbc:postgresql://" + fixedDbUrl.substring("postgres://".length());
             } else if (fixedDbUrl.startsWith("postgresql://")) {
@@ -63,6 +67,8 @@ public class PostgresAutoCreationPostProcessor implements EnvironmentPostProcess
                 log.info("Automatically sanitized datasource URL to include 'jdbc:' prefix.");
                 Map<String, Object> dbProps = new HashMap<>();
                 dbProps.put("spring.datasource.url", fixedDbUrl);
+                dbProps.put("SPRING_DATASOURCE_URL", fixedDbUrl);
+                dbProps.put("DATABASE_URL", fixedDbUrl);
                 environment.getPropertySources().addFirst(new MapPropertySource("sanitizedDatasourceUrl", dbProps));
             }
         }
