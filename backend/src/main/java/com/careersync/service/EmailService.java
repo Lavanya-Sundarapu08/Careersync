@@ -177,7 +177,7 @@ public class EmailService {
             helper.setText(html, true);
             mailSender.send(msg);
             log.debug("Email sent to {} | subject: {}", to, subject);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.warn("Failed to send email to {} ({}): {}", to, subject, e.getMessage());
         }
     }
