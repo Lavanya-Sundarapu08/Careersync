@@ -9,7 +9,7 @@ export interface UserSummary {
   email: string
   fullName: string
   role: Role
-  companyId: string | null
+  companyId?: string | null
 }
 
 export interface TokenResponse {

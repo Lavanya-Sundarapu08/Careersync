@@ -59,6 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: payload.sub,
         fullName: payload.sub.split('@')[0],
         role: payload.role,
+        companyId: payload.companyId ?? null,
       }
       setUser(userSummary)
     }
